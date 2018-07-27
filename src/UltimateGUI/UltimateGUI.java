@@ -21,6 +21,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -34,6 +35,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.TitledBorder;
 
 import UltimateGUI.util.Constants;
@@ -42,10 +44,6 @@ import UltimateGUI.util.UltimateRunner;
 import UltimateGUI.util.UltimateRunner.ANALYSIS;
 import UltimateGUI.util.UltimateRunner.ARCHITECTURE;
 import UltimateGUI.util.UltimateRunner.PRECISION;
-
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JProgressBar;
 
 public class UltimateGUI {
 

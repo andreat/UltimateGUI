@@ -1,5 +1,8 @@
-# Eclipse target directory
+# Ultimate Automizer tool
+UAutomizer-linux/
+UAutomizer-win32/
 
+# Eclipse target directory
 target/
 
 # Compiled class file

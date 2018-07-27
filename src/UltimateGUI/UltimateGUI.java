@@ -37,6 +37,7 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.Document;
 
 import UltimateGUI.util.Constants;
 import UltimateGUI.util.UltimateException;
@@ -44,6 +45,9 @@ import UltimateGUI.util.UltimateRunner;
 import UltimateGUI.util.UltimateRunner.ANALYSIS;
 import UltimateGUI.util.UltimateRunner.ARCHITECTURE;
 import UltimateGUI.util.UltimateRunner.PRECISION;
+import javax.swing.JPopupMenu;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class UltimateGUI {
 
@@ -71,6 +75,7 @@ public class UltimateGUI {
 	private final Action actionFileOpen = new SwingActionFileOpen();
 	private final Action actionFileQuit = new SwingActionFileQuit();
 	private final Action actionAnalyze = new SwingActionAnalyze();
+	private final Action actionInsertReachabilityStatement = new SwingActionInsertReachabilityStatement();
 
 	/**
 	 * Launch the application.
@@ -96,6 +101,7 @@ public class UltimateGUI {
 		frame = new JFrame();
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		programPane = new JEditorPane();
+		
 		resultPane = new JTextPane();
 		fileChooser = new JFileChooserConfirmed();
 		rdbtn32bits = new JRadioButton("32 bits");
@@ -120,6 +126,13 @@ public class UltimateGUI {
 		panelControl.setBorder(null);
 		frame.getContentPane().add(panelControl, BorderLayout.EAST);
 		
+		JPopupMenu pmContextual = new JPopupMenu();
+		addPopup(programPane, pmContextual);
+		
+		JMenuItem mntmInsertReachabilityStatement = new JMenuItem("Insert reachability statement");
+		mntmInsertReachabilityStatement.setAction(actionInsertReachabilityStatement);
+		pmContextual.add(mntmInsertReachabilityStatement);
+
 		ButtonGroup bgArchitecture = new ButtonGroup();
 		GridBagLayout gbl_panelControl = new GridBagLayout();
 		gbl_panelControl.columnWeights = new double[]{1.0};
@@ -484,5 +497,43 @@ public class UltimateGUI {
 			resultPane.setCaretPosition(0);
 			tabbedPane.setSelectedComponent(resultTab);
 		}
+	}
+	private class SwingActionInsertReachabilityStatement extends AbstractAction {
+		private static final long serialVersionUID = 6100833632380456699L;
+		public SwingActionInsertReachabilityStatement() {
+			putValue(NAME, "Insert reachability statement");
+			putValue(SHORT_DESCRIPTION, "Insert a reachability statement");
+			putValue(MNEMONIC_KEY, KeyEvent.VK_I);
+			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK));
+		}
+		public void actionPerformed(ActionEvent e) {
+			int caretPosition = programPane.getCaretPosition();
+			String program = programPane.getText();
+			StringBuilder sb = new StringBuilder(program.length() + 25);
+			if (caretPosition > 0) {
+				sb.append(program.substring(0, caretPosition));
+			}
+			sb.append(Constants.LINE_SEPARATOR)
+				.append("__VERIFIER_error();")
+				.append(program.substring(caretPosition));
+			programPane.setText(sb.toString());
+		}
+	}
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
 	}
 }

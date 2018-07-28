@@ -9,6 +9,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
@@ -29,6 +31,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -36,8 +39,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
-import javax.swing.text.Document;
 
 import UltimateGUI.util.Constants;
 import UltimateGUI.util.UltimateException;
@@ -45,9 +48,6 @@ import UltimateGUI.util.UltimateRunner;
 import UltimateGUI.util.UltimateRunner.ANALYSIS;
 import UltimateGUI.util.UltimateRunner.ARCHITECTURE;
 import UltimateGUI.util.UltimateRunner.PRECISION;
-import javax.swing.JPopupMenu;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public class UltimateGUI {
 
@@ -97,6 +97,12 @@ public class UltimateGUI {
 	 * Create the application.
 	 */
 	public UltimateGUI() {
+		try {
+            // Set System L&F
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			// who cares...
+		}
 		openedFile = null;
 		frame = new JFrame();
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -118,7 +124,7 @@ public class UltimateGUI {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame.setBounds(100, 100, 450, 380);
+		frame.setBounds(100, 100, 500, 400);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		

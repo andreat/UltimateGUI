@@ -48,6 +48,7 @@ import UltimateGUI.util.UltimateRunner;
 import UltimateGUI.util.UltimateRunner.ANALYSIS;
 import UltimateGUI.util.UltimateRunner.ARCHITECTURE;
 import UltimateGUI.util.UltimateRunner.PRECISION;
+import java.awt.Font;
 
 public class UltimateGUI {
 
@@ -113,6 +114,7 @@ public class UltimateGUI {
 		rdbtn32bits = new JRadioButton("32 bits");
 		rdbtn64bits = new JRadioButton("64 bits");
 		rdbtnReachability = new JRadioButton("Reachability");
+		rdbtnReachability.setToolTipText("Right click on the program to insert the reachability statement on the right of the caret");
 		rdbtnTermination = new JRadioButton("Termination");
 		rdbtndefault = new JRadioButton("Default");
 		rdbtnbitprecise = new JRadioButton("Bit precise");
@@ -124,7 +126,7 @@ public class UltimateGUI {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame.setBounds(100, 100, 500, 400);
+		frame.setBounds(100, 100, 900, 700);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
@@ -275,6 +277,7 @@ public class UltimateGUI {
 		tabbedPane.setMnemonicAt(tabbedPane.getTabCount() - 1, KeyEvent.VK_P);
 		
 		programPane.setText(Constants.C_PROGRAM);
+		programPane.setFont(new Font("Monospaced", Font.PLAIN, 12));
 		scrollPaneProgram.setViewportView(programPane);
 		
 		JScrollPane scrollPaneResult = new JScrollPane();
@@ -283,6 +286,7 @@ public class UltimateGUI {
 		resultTab = scrollPaneResult;
 		
 		resultPane.setText("Results of the analysis");
+		resultPane.setFont(new Font("Monospaced", Font.PLAIN, 12));
 		resultPane.setEditable(false);
 		scrollPaneResult.setViewportView(resultPane);
 		
@@ -320,6 +324,8 @@ public class UltimateGUI {
 		JMenu mnOptions = new JMenu("Options");
 		menuBar.add(mnOptions);
 		
+		chckbxmntmShowUltimateFull.setMnemonic('L');
+		chckbxmntmShowUltimateFull.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
 		mnOptions.add(chckbxmntmShowUltimateFull);
 	}
 

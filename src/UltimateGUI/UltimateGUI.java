@@ -72,7 +72,7 @@ public class UltimateGUI {
 
 	private File openedFile;
 	
-	private final JFrame frame;
+	private final JFrame frmUltimateGui;
 	private final JTabbedPane tabbedPane;
 	private final JEditorPane programPane;
 	private final JTextPane resultPane;
@@ -109,7 +109,7 @@ public class UltimateGUI {
 			public void run() {
 				try {
 					UltimateGUI window = new UltimateGUI();
-					window.frame.setVisible(true);
+					window.frmUltimateGui.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -128,7 +128,8 @@ public class UltimateGUI {
 			// who cares...
 		}
 		openedFile = null;
-		frame = new JFrame();
+		frmUltimateGui = new JFrame();
+		frmUltimateGui.setTitle("Ultimate GUI");
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		programPane = new JEditorPane();
 		
@@ -151,13 +152,13 @@ public class UltimateGUI {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame.setBounds(100, 100, 900, 700);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(new BorderLayout(0, 0));
+		frmUltimateGui.setBounds(100, 100, 900, 700);
+		frmUltimateGui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmUltimateGui.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JPanel panelControl = new JPanel();
 		panelControl.setBorder(null);
-		frame.getContentPane().add(panelControl, BorderLayout.EAST);
+		frmUltimateGui.getContentPane().add(panelControl, BorderLayout.EAST);
 		
 		JPopupMenu pmContextual = new JPopupMenu();
 		addPopup(programPane, pmContextual);
@@ -294,7 +295,7 @@ public class UltimateGUI {
 		gbc_btnAnalyze.gridy = 3;
 		panelControl.add(btnAnalyze, gbc_btnAnalyze);
 		
-		frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
+		frmUltimateGui.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 		
 		JScrollPane scrollPaneProgram = new JScrollPane();
 		tabbedPane.addTab("Program", null, scrollPaneProgram, null);
@@ -316,7 +317,7 @@ public class UltimateGUI {
 		scrollPaneResult.setViewportView(resultPane);
 		
 		JMenuBar menuBar = new JMenuBar();
-		frame.setJMenuBar(menuBar);
+		frmUltimateGui.setJMenuBar(menuBar);
 		
 		JMenu mnFile = new JMenu("File");
 		mnFile.setMnemonic('F');
@@ -398,7 +399,7 @@ public class UltimateGUI {
 		}
 		public void actionPerformed(ActionEvent e) {
 			//TODO: ask for saving previous opened file, if changed
-			int returnVal = fileChooser.showOpenDialog(frame);
+			int returnVal = fileChooser.showOpenDialog(frmUltimateGui);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				openedFile = fileChooser.getSelectedFile();
 				try(FileReader fr = new FileReader(openedFile)){
@@ -418,7 +419,7 @@ public class UltimateGUI {
 		}
 		public void actionPerformed(ActionEvent e) {
 			if (openedFile == null) {
-				int returnVal = fileChooser.showSaveDialog(frame);
+				int returnVal = fileChooser.showSaveDialog(frmUltimateGui);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					openedFile = fileChooser.getSelectedFile();
 				}
@@ -437,7 +438,7 @@ public class UltimateGUI {
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
 		}
 		public void actionPerformed(ActionEvent e) {
-			int returnVal = fileChooser.showSaveDialog(frame);
+			int returnVal = fileChooser.showSaveDialog(frmUltimateGui);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fileChooser.getSelectedFile();
 				try(FileWriter fw = new FileWriter(file)) {

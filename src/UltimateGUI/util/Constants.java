@@ -40,6 +40,8 @@ public class Constants {
 	public static final String FALSE = "FALSE";
 	
 	public static final String C_PROGRAM = "//C program";
+	public static final String TAB = "    ";
+	public static final String REACHABILITY_STATEMENT = "__VERIFIER_error();";
 	
 	public static final String version = "8e1d75aa";
 	public static final String toolname = "Automizer";

@@ -95,7 +95,7 @@ public class UltimateGUI {
 	private final Action actionFileQuit = new SwingActionFileQuit();
 	private final Action actionAnalyze = new SwingActionAnalyze();
 	private final Action actionExampleTerminationBounded = new SwingActionExampleTerminationBounded();
-	private final Action actionExampleTerminationUnounded = new SwingActionExampleTerminationUnbounded();
+	private final Action actionExampleTerminationUnbounded = new SwingActionExampleTerminationUnbounded();
 	private final Action actionExampleReachabilityBounded = new SwingActionExampleReachabilityBounded();
 	private final Action actionExampleReachabilityUnbounded = new SwingActionExampleReachabilityUnbounded();
 	private final Action actionInsertReachabilityStatement = new SwingActionInsertReachabilityStatement();
@@ -355,14 +355,24 @@ public class UltimateGUI {
 		mnExamples.setMnemonic('E');
 		menuBar.add(mnExamples);
 		
-		JMenuItem mntmTerminationBounded = new JMenuItem("Termination - bounded");
+		JMenuItem mntmReachabilityBounded = new JMenuItem("Reachability - Bounded");
+		mntmReachabilityBounded.setAction(actionExampleReachabilityBounded);
+		mnExamples.add(mntmReachabilityBounded);
+		
+		JMenuItem mntmReachabilityUnbounded = new JMenuItem("Reachability - Unbounded");
+		mntmReachabilityUnbounded.setAction(actionExampleReachabilityUnbounded);
+		mnExamples.add(mntmReachabilityUnbounded);
+		
+		JSeparator separator = new JSeparator();
+		mnExamples.add(separator);
+		
+		JMenuItem mntmTerminationBounded = new JMenuItem("Termination - Bounded");
+		mntmTerminationBounded.setAction(actionExampleTerminationBounded);
 		mnExamples.add(mntmTerminationBounded);
 		
-		JMenuItem mntmTerminationUnbounded = new JMenuItem("Termination - unbounded");
+		JMenuItem mntmTerminationUnbounded = new JMenuItem("Termination - Unbounded");
+		mntmTerminationUnbounded.setAction(actionExampleTerminationUnbounded);
 		mnExamples.add(mntmTerminationUnbounded);
-		
-		JMenuItem mntmReachability = new JMenuItem("Reachability");
-		mnExamples.add(mntmReachability);
 	}
 
 	private class SwingActionFileNew extends AbstractAction {
@@ -547,7 +557,7 @@ public class UltimateGUI {
 		}
 	}
 	private class SwingActionExampleTerminationBounded extends AbstractAction {
-		private static final long serialVersionUID = -7627026683518078105L;
+		private static final long serialVersionUID = 6735251012364080512L;
 		public SwingActionExampleTerminationBounded() {
 			putValue(NAME, "Termination - Bounded");
 			putValue(SHORT_DESCRIPTION, "Termination analysis example with bounded values");
@@ -555,23 +565,75 @@ public class UltimateGUI {
 		public void actionPerformed(ActionEvent e) {
 			//TODO: ask for saving previous opened file, if changed
 			StringBuilder sb = new StringBuilder();
+			sb.append("extern int nd();")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.LINE_SEPARATOR)
+				.append("int main(void) {")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("int x = nd();")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("int y = x + 1;")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("while (x < y) {")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append("x = x + 1;")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append("y = y + 1;")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("}")
+				.append(Constants.LINE_SEPARATOR)
+				.append("}")
+				.append(Constants.LINE_SEPARATOR);
+			
+			rdbtnReachability.setSelected(false);
+			rdbtnReachability.setSelected(true);
+			rdbtnBounded.setSelected(true);
+			rdbtnUnbounded.setSelected(false);
 			programPane.setText(sb.toString());
+			programPane.setCaretPosition(0);
+			tabbedPane.setSelectedComponent(programTab);
 		}
 	}
 	private class SwingActionExampleTerminationUnbounded extends AbstractAction {
-		private static final long serialVersionUID = -793683296911902497L;
+		private static final long serialVersionUID = 8244185466711726741L;
 		public SwingActionExampleTerminationUnbounded() {
-			putValue(NAME, "Termination - Unounded");
+			putValue(NAME, "Termination - Unbounded");
 			putValue(SHORT_DESCRIPTION, "Termination analysis example with unbounded values");
 		}
 		public void actionPerformed(ActionEvent e) {
 			//TODO: ask for saving previous opened file, if changed
 			StringBuilder sb = new StringBuilder();
+			sb.append("extern int nd();")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.LINE_SEPARATOR)
+				.append("int main(void) {")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("int x = nd();")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("int y = x + 1;")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("while (x < y) {")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append("x = x + 1;")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append("y = y + 1;")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("}")
+				.append(Constants.LINE_SEPARATOR)
+				.append("}")
+				.append(Constants.LINE_SEPARATOR);
+			
+			rdbtnReachability.setSelected(false);
+			rdbtnReachability.setSelected(true);
+			rdbtnBounded.setSelected(false);
+			rdbtnUnbounded.setSelected(true);
 			programPane.setText(sb.toString());
+			programPane.setCaretPosition(0);
+			tabbedPane.setSelectedComponent(programTab);
 		}
 	}
 	private class SwingActionExampleReachabilityBounded extends AbstractAction {
-		private static final long serialVersionUID = -7627026683518078105L;
+		private static final long serialVersionUID = -5915762892724379882L;
 		public SwingActionExampleReachabilityBounded() {
 			putValue(NAME, "Reachability - Bounded");
 			putValue(SHORT_DESCRIPTION, "Reachability analysis example with bounded values");
@@ -579,23 +641,87 @@ public class UltimateGUI {
 		public void actionPerformed(ActionEvent e) {
 			//TODO: ask for saving previous opened file, if changed
 			StringBuilder sb = new StringBuilder();
+			sb.append("extern int nd();")
+			.append(Constants.LINE_SEPARATOR)
+			.append(Constants.LINE_SEPARATOR)
+			.append("int main(void) {")
+			.append(Constants.LINE_SEPARATOR)
+			.append(Constants.TAB).append("int x = nd();")
+			.append(Constants.LINE_SEPARATOR)
+			.append(Constants.TAB).append("int y = x + 1;")
+			.append(Constants.LINE_SEPARATOR)
+			.append(Constants.TAB).append("while (x != 0) {")
+			.append(Constants.LINE_SEPARATOR)
+			.append(Constants.TAB).append(Constants.TAB).append("x = x + 1;")
+			.append(Constants.LINE_SEPARATOR)
+			.append(Constants.TAB).append(Constants.TAB).append("y = y + 1;")
+			.append(Constants.LINE_SEPARATOR)
+			.append(Constants.TAB).append(Constants.TAB).append("if (y < x) {")
+			.append(Constants.LINE_SEPARATOR)
+			.append(Constants.TAB).append(Constants.TAB).append(Constants.TAB).append(Constants.REACHABILITY_STATEMENT)
+			.append(Constants.LINE_SEPARATOR)
+			.append(Constants.TAB).append(Constants.TAB).append("}")
+			.append(Constants.LINE_SEPARATOR)
+			.append(Constants.TAB).append("}")
+			.append(Constants.LINE_SEPARATOR)
+			.append("}")
+			.append(Constants.LINE_SEPARATOR);
+			
+			rdbtnReachability.setSelected(true);
+			rdbtnReachability.setSelected(false);
+			rdbtnBounded.setSelected(true);
+			rdbtnUnbounded.setSelected(false);
 			programPane.setText(sb.toString());
+			programPane.setCaretPosition(0);
+			tabbedPane.setSelectedComponent(programTab);
 		}
 	}
 	private class SwingActionExampleReachabilityUnbounded extends AbstractAction {
-		private static final long serialVersionUID = 5977193581545428641L;
+		private static final long serialVersionUID = 4495194170240292961L;
 		public SwingActionExampleReachabilityUnbounded() {
-			putValue(NAME, "Reachability - Unounded");
+			putValue(NAME, "Reachability - Unbounded");
 			putValue(SHORT_DESCRIPTION, "Reachability analysis example with unbounded values");
 		}
 		public void actionPerformed(ActionEvent e) {
 			//TODO: ask for saving previous opened file, if changed
 			StringBuilder sb = new StringBuilder();
+			sb.append("extern int nd();")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.LINE_SEPARATOR)
+				.append("int main(void) {")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("int x = nd();")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("int y = x + 1;")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("while (x != 0) {")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append("x = x + 1;")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append("y = y + 1;")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append("if (y < x) {")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append(Constants.TAB).append(Constants.REACHABILITY_STATEMENT)
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append("}")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("}")
+				.append(Constants.LINE_SEPARATOR)
+				.append("}")
+				.append(Constants.LINE_SEPARATOR);
+			
+			rdbtnReachability.setSelected(true);
+			rdbtnReachability.setSelected(false);
+			rdbtnBounded.setSelected(false);
+			rdbtnUnbounded.setSelected(true);
 			programPane.setText(sb.toString());
+			programPane.setCaretPosition(0);
+			tabbedPane.setSelectedComponent(programTab);
 		}
 	}
 	private class SwingActionInsertReachabilityStatement extends AbstractAction {
-		private static final long serialVersionUID = 6100833632380456699L;
+		private static final long serialVersionUID = -1394639078833666581L;
 		public SwingActionInsertReachabilityStatement() {
 			putValue(NAME, "Insert reachability statement");
 			putValue(SHORT_DESCRIPTION, "Insert a reachability statement");
@@ -610,7 +736,7 @@ public class UltimateGUI {
 				sb.append(program.substring(0, caretPosition));
 			}
 			sb.append(Constants.LINE_SEPARATOR)
-				.append("__VERIFIER_error();")
+				.append(Constants.REACHABILITY_STATEMENT)
 				.append(program.substring(caretPosition));
 			programPane.setText(sb.toString());
 		}

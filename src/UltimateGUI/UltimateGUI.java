@@ -21,6 +21,7 @@ package UltimateGUI;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -41,7 +42,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JCheckBox;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -66,7 +67,6 @@ import UltimateGUI.util.UltimateRunner;
 import UltimateGUI.util.UltimateRunner.ANALYSIS;
 import UltimateGUI.util.UltimateRunner.ARCHITECTURE;
 import UltimateGUI.util.UltimateRunner.PRECISION;
-import java.awt.Font;
 
 public class UltimateGUI {
 
@@ -87,7 +87,7 @@ public class UltimateGUI {
 	private final JRadioButton rdbtnTermination;
 	private final JRadioButton rdbtnUnbounded;
 	private final JRadioButton rdbtnBounded;
-	private final JCheckBoxMenuItem chckbxmntmShowUltimateFull;
+	private final JCheckBox chckbxShowUltimateFull;
 	private final Action actionFileSave = new SwingActionFileSave();
 	private final Action actionFileSaveAs = new SwingActionFileSaveAs();
 	private final Action actionFileNew = new SwingActionFileNew();
@@ -144,7 +144,7 @@ public class UltimateGUI {
 		rdbtnTermination.setAction(actionAnalysisTermination);
 		rdbtnUnbounded = new JRadioButton("Unbounded");
 		rdbtnBounded = new JRadioButton("Bounded");
-		chckbxmntmShowUltimateFull = new JCheckBoxMenuItem("Show Ultimate full log");
+		chckbxShowUltimateFull = new JCheckBox("Show Ultimate full log");
 		initialize();
 	}
 
@@ -170,8 +170,8 @@ public class UltimateGUI {
 		ButtonGroup bgArchitecture = new ButtonGroup();
 		GridBagLayout gbl_panelControl = new GridBagLayout();
 		gbl_panelControl.columnWeights = new double[]{1.0};
-		gbl_panelControl.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-		gbl_panelControl.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
+		gbl_panelControl.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+		gbl_panelControl.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
 		panelControl.setLayout(gbl_panelControl);
 		
 		JPanel panelArchitecture = new JPanel();
@@ -286,13 +286,21 @@ public class UltimateGUI {
 		);
 		panelPrecision.setLayout(gl_panelPrecision);
 		
+		chckbxShowUltimateFull.setMnemonic('L');
+		
+		GridBagConstraints gbc_chckbxShowUltimateFull = new GridBagConstraints();
+		gbc_chckbxShowUltimateFull.insets = new Insets(0, 0, 5, 0);
+		gbc_chckbxShowUltimateFull.gridx = 0;
+		gbc_chckbxShowUltimateFull.gridy = 3;
+		panelControl.add(chckbxShowUltimateFull, gbc_chckbxShowUltimateFull);
+		
 		JButton btnAnalyze = new JButton("Analyze");
 		btnAnalyze.setAction(actionAnalyze);
 		GridBagConstraints gbc_btnAnalyze = new GridBagConstraints();
 		gbc_btnAnalyze.insets = new Insets(0, 0, 5, 0);
 		gbc_btnAnalyze.anchor = GridBagConstraints.SOUTH;
 		gbc_btnAnalyze.gridx = 0;
-		gbc_btnAnalyze.gridy = 3;
+		gbc_btnAnalyze.gridy = 4;
 		panelControl.add(btnAnalyze, gbc_btnAnalyze);
 		
 		frmUltimateGui.getContentPane().add(tabbedPane, BorderLayout.CENTER);
@@ -346,14 +354,6 @@ public class UltimateGUI {
 		JMenuItem mntmQuit = new JMenuItem("Quit");
 		mntmQuit.setAction(actionFileQuit);
 		mnFile.add(mntmQuit);
-		
-		JMenu mnOptions = new JMenu("Options");
-		mnOptions.setMnemonic('O');
-		menuBar.add(mnOptions);
-		
-		chckbxmntmShowUltimateFull.setMnemonic('L');
-		chckbxmntmShowUltimateFull.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
-		mnOptions.add(chckbxmntmShowUltimateFull);
 		
 		JMenu mnExamples = new JMenu("Examples");
 		mnExamples.setMnemonic('E');
@@ -567,7 +567,7 @@ public class UltimateGUI {
 					.append(Constants.LINE_SEPARATOR)
 					.append(runner.getErrorPath());
 			}
-			if (chckbxmntmShowUltimateFull.isSelected()) {
+			if (chckbxShowUltimateFull.isSelected()) {
 				sb.append(Constants.LINE_SEPARATOR)
 					.append(Constants.LINE_SEPARATOR)
 					.append("Ultimate Automizer log: ")

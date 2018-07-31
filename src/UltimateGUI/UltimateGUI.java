@@ -67,8 +67,8 @@ public class UltimateGUI {
 	private final JRadioButton rdbtn64bits;
 	private final JRadioButton rdbtnReachability;
 	private final JRadioButton rdbtnTermination;
-	private final JRadioButton rdbtndefault;
-	private final JRadioButton rdbtnbitprecise;
+	private final JRadioButton rdbtnUnbounded;
+	private final JRadioButton rdbtnBounded;
 	private final JCheckBoxMenuItem chckbxmntmShowUltimateFull;
 	private final Action actionFileSave = new SwingActionFileSave();
 	private final Action actionFileSaveAs = new SwingActionFileSaveAs();
@@ -76,6 +76,10 @@ public class UltimateGUI {
 	private final Action actionFileOpen = new SwingActionFileOpen();
 	private final Action actionFileQuit = new SwingActionFileQuit();
 	private final Action actionAnalyze = new SwingActionAnalyze();
+	private final Action actionExampleTerminationBounded = new SwingActionExampleTerminationBounded();
+	private final Action actionExampleTerminationUnounded = new SwingActionExampleTerminationUnbounded();
+	private final Action actionExampleReachabilityBounded = new SwingActionExampleReachabilityBounded();
+	private final Action actionExampleReachabilityUnbounded = new SwingActionExampleReachabilityUnbounded();
 	private final Action actionInsertReachabilityStatement = new SwingActionInsertReachabilityStatement();
 
 	/**
@@ -116,8 +120,8 @@ public class UltimateGUI {
 		rdbtnReachability = new JRadioButton("Reachability");
 		rdbtnReachability.setToolTipText("Right click on the program to insert the reachability statement on the right of the caret");
 		rdbtnTermination = new JRadioButton("Termination");
-		rdbtndefault = new JRadioButton("Default");
-		rdbtnbitprecise = new JRadioButton("Bit precise");
+		rdbtnUnbounded = new JRadioButton("Unbounded");
+		rdbtnBounded = new JRadioButton("Bounded");
 		chckbxmntmShowUltimateFull = new JCheckBoxMenuItem("Show Ultimate full log");
 		initialize();
 	}
@@ -234,28 +238,28 @@ public class UltimateGUI {
 		panelControl.add(panelPrecision, gbc_panelPrecision);
 		panelPrecision.setBorder(new TitledBorder(null, "Precision", TitledBorder.LEADING, TitledBorder.TOP));
 		
-		rdbtndefault.setSelected(true);
-		rdbtndefault.setMnemonic('D');
-		bgPrecision.add(rdbtndefault);
+		rdbtnUnbounded.setSelected(true);
+		rdbtnUnbounded.setMnemonic('U');
+		bgPrecision.add(rdbtnUnbounded);
 		
-		rdbtnbitprecise.setMnemonic('B');
-		bgPrecision.add(rdbtnbitprecise);
+		rdbtnBounded.setMnemonic('B');
+		bgPrecision.add(rdbtnBounded);
 		
 		GroupLayout gl_panelPrecision = new GroupLayout(panelPrecision);
 		gl_panelPrecision.setHorizontalGroup(
 			gl_panelPrecision.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panelPrecision.createSequentialGroup()
 					.addGroup(gl_panelPrecision.createParallelGroup(Alignment.LEADING)
-						.addComponent(rdbtndefault)
-						.addComponent(rdbtnbitprecise))
+						.addComponent(rdbtnUnbounded)
+						.addComponent(rdbtnBounded))
 					.addContainerGap(71, Short.MAX_VALUE))
 		);
 		gl_panelPrecision.setVerticalGroup(
 			gl_panelPrecision.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panelPrecision.createSequentialGroup()
-					.addComponent(rdbtndefault)
+					.addComponent(rdbtnUnbounded)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(rdbtnbitprecise)
+					.addComponent(rdbtnBounded)
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
 		panelPrecision.setLayout(gl_panelPrecision);
@@ -322,11 +326,25 @@ public class UltimateGUI {
 		mnFile.add(mntmQuit);
 		
 		JMenu mnOptions = new JMenu("Options");
+		mnOptions.setMnemonic('O');
 		menuBar.add(mnOptions);
 		
 		chckbxmntmShowUltimateFull.setMnemonic('L');
 		chckbxmntmShowUltimateFull.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
 		mnOptions.add(chckbxmntmShowUltimateFull);
+		
+		JMenu mnExamples = new JMenu("Examples");
+		mnExamples.setMnemonic('E');
+		menuBar.add(mnExamples);
+		
+		JMenuItem mntmTerminationBounded = new JMenuItem("Termination - bounded");
+		mnExamples.add(mntmTerminationBounded);
+		
+		JMenuItem mntmTerminationUnbounded = new JMenuItem("Termination - unbounded");
+		mnExamples.add(mntmTerminationUnbounded);
+		
+		JMenuItem mntmReachability = new JMenuItem("Reachability");
+		mnExamples.add(mntmReachability);
 	}
 
 	private class SwingActionFileNew extends AbstractAction {
@@ -460,10 +478,10 @@ public class UltimateGUI {
 					return;
 				}
 			}
-			if (rdbtnbitprecise.isSelected()) {
+			if (rdbtnBounded.isSelected()) {
 				precision = PRECISION.BITPRECISE;
 			} else {
-				if (rdbtndefault.isSelected()) {
+				if (rdbtnUnbounded.isSelected()) {
 					precision = PRECISION.DEFAULT;
 				} else {
 					setResult("Unknown precision");
@@ -508,6 +526,54 @@ public class UltimateGUI {
 			resultPane.setText(content);
 			resultPane.setCaretPosition(0);
 			tabbedPane.setSelectedComponent(resultTab);
+		}
+	}
+	private class SwingActionExampleTerminationBounded extends AbstractAction {
+		private static final long serialVersionUID = -7627026683518078105L;
+		public SwingActionExampleTerminationBounded() {
+			putValue(NAME, "Termination - Bounded");
+			putValue(SHORT_DESCRIPTION, "Termination analysis example with bounded values");
+		}
+		public void actionPerformed(ActionEvent e) {
+			//TODO: ask for saving previous opened file, if changed
+			StringBuilder sb = new StringBuilder();
+			programPane.setText(sb.toString());
+		}
+	}
+	private class SwingActionExampleTerminationUnbounded extends AbstractAction {
+		private static final long serialVersionUID = -793683296911902497L;
+		public SwingActionExampleTerminationUnbounded() {
+			putValue(NAME, "Termination - Unounded");
+			putValue(SHORT_DESCRIPTION, "Termination analysis example with unbounded values");
+		}
+		public void actionPerformed(ActionEvent e) {
+			//TODO: ask for saving previous opened file, if changed
+			StringBuilder sb = new StringBuilder();
+			programPane.setText(sb.toString());
+		}
+	}
+	private class SwingActionExampleReachabilityBounded extends AbstractAction {
+		private static final long serialVersionUID = -7627026683518078105L;
+		public SwingActionExampleReachabilityBounded() {
+			putValue(NAME, "Reachability - Bounded");
+			putValue(SHORT_DESCRIPTION, "Reachability analysis example with bounded values");
+		}
+		public void actionPerformed(ActionEvent e) {
+			//TODO: ask for saving previous opened file, if changed
+			StringBuilder sb = new StringBuilder();
+			programPane.setText(sb.toString());
+		}
+	}
+	private class SwingActionExampleReachabilityUnbounded extends AbstractAction {
+		private static final long serialVersionUID = 5977193581545428641L;
+		public SwingActionExampleReachabilityUnbounded() {
+			putValue(NAME, "Reachability - Unounded");
+			putValue(SHORT_DESCRIPTION, "Reachability analysis example with unbounded values");
+		}
+		public void actionPerformed(ActionEvent e) {
+			//TODO: ask for saving previous opened file, if changed
+			StringBuilder sb = new StringBuilder();
+			programPane.setText(sb.toString());
 		}
 	}
 	private class SwingActionInsertReachabilityStatement extends AbstractAction {

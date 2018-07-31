@@ -162,7 +162,6 @@ public class UltimateRunner {
 		if (!path.contains(Constants.ultimatedir)) {
 			environment.put(Constants.PATH, Constants.ultimatedir + Constants.PATH_SEPARATOR + path);
 		}
-		System.out.println(environment.get(Constants.PATH));
 		pb.redirectErrorStream(true);
 		Process ultimate_process;
 		try {

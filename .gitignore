@@ -5,6 +5,10 @@ UAutomizer-win32/
 # Eclipse target directory
 target/
 
+# Backup files
+*.bak
+*~
+
 # Compiled class file
 *.class
 

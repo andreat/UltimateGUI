@@ -158,8 +158,11 @@ public class UltimateRunner {
 	public void execute() throws UltimateException {
 		ProcessBuilder pb = new ProcessBuilder(command);
 		Map<String, String> environment = pb.environment();
-		String path = environment.get("PATH");
-		environment.put("PATH", path + Constants.PATH_SEPARATOR + Constants.ultimatedir);
+		String path = environment.get(Constants.PATH);
+		if (!path.contains(Constants.ultimatedir)) {
+			environment.put(Constants.PATH, Constants.ultimatedir + Constants.PATH_SEPARATOR + path);
+		}
+		System.out.println(environment.get(Constants.PATH));
 		pb.redirectErrorStream(true);
 		Process ultimate_process;
 		try {

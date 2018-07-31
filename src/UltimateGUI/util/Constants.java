@@ -24,15 +24,17 @@ import java.nio.file.Paths;
 public class Constants {
 
 	public static final String LINE_SEPARATOR = System.lineSeparator();
-	public static final String PATH = "PATH";
 	public static final String PATH_SEPARATOR = File.pathSeparator;
 	public static final String ULTIMATE_OS;
+	public static final String PATH;
 	static {
 		String os = System.getProperty("os.name");
 		if (os.startsWith("Windows")) {
 			ULTIMATE_OS = "UAutomizer-win32";
+			PATH = "Path";
 		} else {
 			ULTIMATE_OS = "UAutomizer-linux";
+			PATH = "PATH";
 		}
 	}
 	

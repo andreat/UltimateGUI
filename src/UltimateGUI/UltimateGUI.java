@@ -586,7 +586,7 @@ public class UltimateGUI {
 				.append(Constants.LINE_SEPARATOR);
 			
 			rdbtnReachability.setSelected(false);
-			rdbtnReachability.setSelected(true);
+			rdbtnTermination.setSelected(true);
 			rdbtnBounded.setSelected(true);
 			rdbtnUnbounded.setSelected(false);
 			programPane.setText(sb.toString());
@@ -624,7 +624,7 @@ public class UltimateGUI {
 				.append(Constants.LINE_SEPARATOR);
 			
 			rdbtnReachability.setSelected(false);
-			rdbtnReachability.setSelected(true);
+			rdbtnTermination.setSelected(true);
 			rdbtnBounded.setSelected(false);
 			rdbtnUnbounded.setSelected(true);
 			programPane.setText(sb.toString());
@@ -642,33 +642,33 @@ public class UltimateGUI {
 			//TODO: ask for saving previous opened file, if changed
 			StringBuilder sb = new StringBuilder();
 			sb.append("extern int nd();")
-			.append(Constants.LINE_SEPARATOR)
-			.append(Constants.LINE_SEPARATOR)
-			.append("int main(void) {")
-			.append(Constants.LINE_SEPARATOR)
-			.append(Constants.TAB).append("int x = nd();")
-			.append(Constants.LINE_SEPARATOR)
-			.append(Constants.TAB).append("int y = x + 1;")
-			.append(Constants.LINE_SEPARATOR)
-			.append(Constants.TAB).append("while (x != 0) {")
-			.append(Constants.LINE_SEPARATOR)
-			.append(Constants.TAB).append(Constants.TAB).append("x = x + 1;")
-			.append(Constants.LINE_SEPARATOR)
-			.append(Constants.TAB).append(Constants.TAB).append("y = y + 1;")
-			.append(Constants.LINE_SEPARATOR)
-			.append(Constants.TAB).append(Constants.TAB).append("if (y < x) {")
-			.append(Constants.LINE_SEPARATOR)
-			.append(Constants.TAB).append(Constants.TAB).append(Constants.TAB).append(Constants.REACHABILITY_STATEMENT)
-			.append(Constants.LINE_SEPARATOR)
-			.append(Constants.TAB).append(Constants.TAB).append("}")
-			.append(Constants.LINE_SEPARATOR)
-			.append(Constants.TAB).append("}")
-			.append(Constants.LINE_SEPARATOR)
-			.append("}")
-			.append(Constants.LINE_SEPARATOR);
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.LINE_SEPARATOR)
+				.append("int main(void) {")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("int x = nd();")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("int y = x + 1;")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("while (x != 0) {")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append("x = x + 1;")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append("y = y + 1;")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append("if (y < x) {")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append(Constants.TAB).append(Constants.REACHABILITY_STATEMENT)
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append(Constants.TAB).append("}")
+				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.TAB).append("}")
+				.append(Constants.LINE_SEPARATOR)
+				.append("}")
+				.append(Constants.LINE_SEPARATOR);
 			
 			rdbtnReachability.setSelected(true);
-			rdbtnReachability.setSelected(false);
+			rdbtnTermination.setSelected(false);
 			rdbtnBounded.setSelected(true);
 			rdbtnUnbounded.setSelected(false);
 			programPane.setText(sb.toString());
@@ -712,7 +712,7 @@ public class UltimateGUI {
 				.append(Constants.LINE_SEPARATOR);
 			
 			rdbtnReachability.setSelected(true);
-			rdbtnReachability.setSelected(false);
+			rdbtnTermination.setSelected(false);
 			rdbtnBounded.setSelected(false);
 			rdbtnUnbounded.setSelected(true);
 			programPane.setText(sb.toString());

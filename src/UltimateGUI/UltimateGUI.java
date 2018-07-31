@@ -61,12 +61,12 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 
+import UltimateGUI.util.ANALYSIS;
+import UltimateGUI.util.ARCHITECTURE;
 import UltimateGUI.util.Constants;
+import UltimateGUI.util.PRECISION;
 import UltimateGUI.util.UltimateException;
 import UltimateGUI.util.UltimateRunner;
-import UltimateGUI.util.UltimateRunner.ANALYSIS;
-import UltimateGUI.util.UltimateRunner.ARCHITECTURE;
-import UltimateGUI.util.UltimateRunner.PRECISION;
 
 public class UltimateGUI {
 
@@ -101,6 +101,7 @@ public class UltimateGUI {
 	private final Action actionExampleReachabilityUnbounded = new SwingActionExampleReachabilityUnbounded();
 	private final Action actionInsertReachabilityStatement = new SwingActionInsertReachabilityStatement();
 
+	private final UltimateGUI window;
 	/**
 	 * Launch the application.
 	 */
@@ -127,6 +128,7 @@ public class UltimateGUI {
 		} catch (Exception e) {
 			// who cares...
 		}
+		window = this;
 		openedFile = null;
 		frmUltimateGui = new JFrame();
 		frmUltimateGui.setTitle("Ultimate GUI");
@@ -495,20 +497,6 @@ public class UltimateGUI {
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK));
 		}
 		public void actionPerformed(ActionEvent e){
-			File tempProgram = null;
-			try {
-				tempProgram = File.createTempFile("UltimateGui", ".c");
-			} catch (IOException ioe) {
-				setResult("General error in creating the program temporary file\n\n" + ioe.getStackTrace().toString());
-				return;
-			}
-			try (BufferedWriter bw = new BufferedWriter(new FileWriter(tempProgram))) {
-				bw.write(programPane.getText());
-			} catch (IOException ioe) {
-				tempProgram.deleteOnExit();
-				setResult("General error in writing the program into its temporary file" + Constants.LINE_SEPARATOR + Constants.LINE_SEPARATOR + ioe.getStackTrace().toString());
-				return;
-			}
 			ARCHITECTURE architecture;
 			ANALYSIS analysis;
 			PRECISION precision;
@@ -542,46 +530,16 @@ public class UltimateGUI {
 					return;
 				}
 			}
-			UltimateRunner runner;
-			try {
-				runner = new UltimateRunner(tempProgram, architecture, analysis, precision);
-				runner.execute();
-			} catch (UltimateException ue) {
-				setResult("General error in running Ultimate Analyzer on the program" + Constants.LINE_SEPARATOR + Constants.LINE_SEPARATOR + ue.getStackTrace().toString());
-				return;
-			} finally {
-				if (!tempProgram.delete()) {
-					tempProgram.deleteOnExit();
-				}
-			}
-			StringBuilder sb = new StringBuilder();
-			sb.append("PROGRAM ANALYSIS RESULTS")
-				.append(Constants.LINE_SEPARATOR)
-				.append(Constants.LINE_SEPARATOR)
-				.append("RESULT: ")
-				.append(runner.getResult());
-			if (runner.isResultFalse()) {
-				sb.append(Constants.LINE_SEPARATOR)
-					.append(Constants.LINE_SEPARATOR)
-					.append("ERROR PATH: ")
-					.append(Constants.LINE_SEPARATOR)
-					.append(runner.getErrorPath());
-			}
-			if (chckbxShowUltimateFull.isSelected()) {
-				sb.append(Constants.LINE_SEPARATOR)
-					.append(Constants.LINE_SEPARATOR)
-					.append("Ultimate Automizer log: ")
-					.append(runner.getUltimateOutput());
-			}
-			setResult(sb.toString());
-		}
-		
-		private void setResult(String content) {
-			resultPane.setText(content);
-			resultPane.setCaretPosition(0);
-			tabbedPane.setSelectedComponent(resultTab);
-		}
+			UltimateRunner runner = new UltimateRunner(window, programPane.getText(), architecture, analysis, precision, chckbxShowUltimateFull.isSelected());
+			runner.execute();
+		}	
 	}
+	public void setResult(String content) {
+		resultPane.setText(content);
+		resultPane.setCaretPosition(0);
+		tabbedPane.setSelectedComponent(resultTab);
+	}
+
 	private class SwingActionExampleTerminationUnbounded extends AbstractAction {
 		private static final long serialVersionUID = 8244185466711726741L;
 		public SwingActionExampleTerminationUnbounded() {

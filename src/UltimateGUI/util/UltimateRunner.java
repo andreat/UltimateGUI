@@ -19,9 +19,11 @@
 package UltimateGUI.util;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
@@ -30,7 +32,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class UltimateRunner {
+import javax.swing.SwingWorker;
+
+import UltimateGUI.UltimateGUI;
+
+public class UltimateRunner extends SwingWorker<Void, Void>{
 	
 	private final static char[] hexArray = "0123456789abcdef".toCharArray();
 	public static String bytesToHex(byte[] bytes) {
@@ -43,85 +49,60 @@ public class UltimateRunner {
 	    return new String(hexChars);
 	}
 	
-	public enum ARCHITECTURE {
-		_32BIT ("32bit"),
-		_64BIT ("64bit");
-
-		private final String string;
-		private ARCHITECTURE(String string) {
-			this.string = string;
-		}
-		
-		@Override
-		public String toString() {
-			return string;
-		}
-	}
-	
-	public enum ANALYSIS {
-		REACHABILITY("Reach"),
-		TERMINATION("Termination"),
-		LTL("LTL");
-		
-		private final String string;
-		private ANALYSIS(String string) {
-			this.string = string;
-		}
-		
-		@Override
-		public String toString() {
-			return string;
-		}
-	}
-	
-	public enum PRECISION {
-		BITPRECISE("Bitvector"),
-		DEFAULT("Default");
-
-		private final String string;
-		private PRECISION(String string) {
-			this.string = string;
-		}
-		
-		@Override
-		public String toString() {
-			return string;
-		}
-	}
-	
 	private final boolean enable_assertions = false;
 	
+	private final UltimateGUI window;
+	private final String program;
 	private final ANALYSIS analysis;
-	private final File toolchain_file;
-	private final File settings_file;
-	private final List<String> command;
+	private final ARCHITECTURE architecture;
+	private final PRECISION precision;
+	private final boolean showFullLog;
 	
-	private String result;
-	private String result_msg;
-	private boolean overapprox;
-	private String ultimate_output;
-	private String error_path;
+	private String resultText;
 	
-	public UltimateRunner(File program, ARCHITECTURE architecture, ANALYSIS analysis, PRECISION precision) throws UltimateException {
+	public UltimateRunner(UltimateGUI window, String program, ARCHITECTURE architecture, ANALYSIS analysis, PRECISION precision, boolean showFullLog) {
+		this.window = window;
+		this.program = program;
 		this.analysis = analysis;
-		this.toolchain_file = search_config_dir(analysis.toString() + ".xml");
-		this.settings_file = search_config_dir(".epf", analysis.toString(), architecture.toString(), "_" + precision.toString());
-		command = new LinkedList<String>();
+		this.architecture = architecture;
+		this.precision = precision;
+		this.showFullLog = showFullLog;
+	}
+	
+	@Override
+	public Void doInBackground() {
+		File tempProgram = null;
+		try {
+			tempProgram = File.createTempFile("UltimateGui", ".c");
+		} catch (Exception ioe) {
+			resultText = "General error in creating the program temporary file\n\n" + ioe.getStackTrace().toString();
+			return null;
+		}
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(tempProgram))) {
+			bw.write(program);
+		} catch (IOException ioe) {
+			tempProgram.deleteOnExit();
+			resultText = "General error in writing the program into its temporary file" + Constants.LINE_SEPARATOR + Constants.LINE_SEPARATOR + ioe.getStackTrace().toString();
+			return null;
+		}
+		File toolchain_file = search_config_dir(analysis.toString() + ".xml");
+		File settings_file = search_config_dir(".epf", analysis.toString(), architecture.toString(), "_" + precision.toString());
+		List<String> command = new LinkedList<String>();
 		command.add("java");
 		command.add("-Dosgi.configuration.area=" + Constants.datadir + File.separator + "config");
-		command.add("-Xmx12G");
+		command.add("-Xmx2G");
 		command.add("-Xms1G");
 		if (enable_assertions) {
 			command.add("-ea");
 		}
 		command.add("-jar");
-		command.add(Constants.ultimatedir + File.separator + "plugins/org.eclipse.equinox.launcher_1.3.100.v20150511-1540.jar");
+		command.add(Constants.ultimatedir + File.separator + "plugins" + File.separator + "org.eclipse.equinox.launcher_1.3.100.v20150511-1540.jar");
 		command.add("-data");
 		command.add(Constants.datadir);
 		command.add("-tc");
 		command.add(toolchain_file.getAbsolutePath());
 		command.add("-i");
-		command.add(program.getAbsolutePath());
+		command.add(tempProgram.getAbsolutePath());
 		command.add("-s");
 		command.add(settings_file.getAbsolutePath());
 		command.add("--cacsl2boogietranslator.entry.function");
@@ -141,7 +122,11 @@ public class UltimateRunner {
 			command.add("CHECK( init(main()), LTL(F end) )");
 			break;
 		default:
-			throw new IllegalArgumentException("Unknown requested analysis: " + analysis.toString()); 
+			resultText = "Unknown requested analysis: " + analysis.toString();
+			if (!tempProgram.delete()) {
+				tempProgram.deleteOnExit();
+			}
+			return null;
 		}
 		command.add("--witnessprinter.graph.data.producer");
 		command.add(Constants.toolname);
@@ -149,13 +134,15 @@ public class UltimateRunner {
 		command.add(architecture.toString());
 		command.add("--witnessprinter.graph.data.programhash");
 		try {
-			command.add(SHA1(program));
+			command.add(SHA1(tempProgram));
 		} catch (Exception e) {
-			throw new UltimateException("General error in computing SHA1SUM for the program", e);
+			resultText = "General error in computing SHA1SUM for the program" + Constants.LINE_SEPARATOR + Constants.LINE_SEPARATOR + e.toString();
+			if (!tempProgram.delete()) {
+				tempProgram.deleteOnExit();
+			}
+			return null;
 		}		
-	}
-	
-	public void execute() throws UltimateException {
+
 		ProcessBuilder pb = new ProcessBuilder(command);
 		Map<String, String> environment = pb.environment();
 		String path = environment.get(Constants.PATH);
@@ -167,7 +154,11 @@ public class UltimateRunner {
 		try {
 			ultimate_process = pb.start();
 		} catch (IOException e) {
-			throw new UltimateException("General error in running Ultimate Automizer", e);
+			resultText = "General error in running Ultimate Automizer" + Constants.LINE_SEPARATOR + Constants.LINE_SEPARATOR + e.toString();
+			if (!tempProgram.delete()) {
+				tempProgram.deleteOnExit();
+			}
+			return null;
 		}
 		StreamGobbler ultimate_process_output = new StreamGobbler(ultimate_process.getInputStream());
 		ultimate_process_output.start();
@@ -182,10 +173,13 @@ public class UltimateRunner {
 			break;
 		}
 		
-	    result = "UNKNOWN";
-	    result_msg = "NONE";
+		if (!tempProgram.delete()) {
+			tempProgram.deleteOnExit();
+		}
+		
+	    String result = "UNKNOWN";
 	    boolean reading_error_path = false;
-	    overapprox = false;
+	    boolean overapprox = false;
 
 	    // poll the output
 	    StringBuilder ultimate_output_sb = new StringBuilder();
@@ -213,7 +207,6 @@ public class UltimateRunner {
 	            overapprox = true;
 	        }
 	        if (analysis == ANALYSIS.TERMINATION) {
-	            result_msg = "TERM";
 	            if (line.contains(Constants.termination_true_string))
 	                result = Constants.TRUE;
 	            if (line.contains(Constants.termination_false_string)) {
@@ -223,7 +216,6 @@ public class UltimateRunner {
 	            if (line.contains(Constants.termination_path_end))
 	                reading_error_path = false;
 		        } else if (analysis == ANALYSIS.LTL) {
-		            result_msg = "valid-ltl";
 		            if (line.contains(Constants.ltl_false_string)) {
 		                result = Constants.FALSE;
 		                reading_error_path = true;
@@ -237,17 +229,8 @@ public class UltimateRunner {
 	                result = Constants.TRUE;
 	            if (line.contains(Constants.unsafety_string))
 	                result = Constants.FALSE;
-	            if (line.contains(Constants.mem_deref_false_string))
-	                result_msg = "valid-deref";
-	            if (line.contains(Constants.mem_deref_false_string_2))
-	                result_msg = "valid-deref";
-	            if (line.contains(Constants.mem_free_false_string))
-	                result_msg = "valid-free";
-	            if (line.contains(Constants.mem_memtrack_false_string))
-	                result_msg = "valid-memtrack";
 	            if (line.contains(Constants.overflow_false_string)) {
 	                result = Constants.FALSE;
-	                result_msg = "OVERFLOW";
 	            }
 	            if (line.contains(Constants.error_path_begin_string))
 	                reading_error_path = true;
@@ -256,8 +239,32 @@ public class UltimateRunner {
 	        }
 	    }
 
-	    ultimate_output = ultimate_output_sb.toString();
-	    error_path = error_path_sb.toString();
+		StringBuilder sb = new StringBuilder();
+		sb.append("PROGRAM ANALYSIS RESULTS")
+			.append(Constants.LINE_SEPARATOR)
+			.append(Constants.LINE_SEPARATOR)
+			.append("RESULT: ")
+			.append(result);
+		if (result.equals(Constants.FALSE)) {
+			sb.append(Constants.LINE_SEPARATOR)
+				.append(Constants.LINE_SEPARATOR)
+				.append("ERROR PATH: ")
+				.append(Constants.LINE_SEPARATOR)
+				.append(error_path_sb.toString());
+		}
+		if (showFullLog) {
+			sb.append(Constants.LINE_SEPARATOR)
+				.append(Constants.LINE_SEPARATOR)
+				.append("Ultimate Automizer log: ")
+				.append(ultimate_output_sb.toString());
+		}
+		resultText = sb.toString();
+	    return null;
+	}
+	
+	@Override
+	protected void done( ) {
+		window.setResult(resultText);
 	}
 	
 	private boolean contains_overapproximation_result(String line) {
@@ -275,34 +282,6 @@ public class UltimateRunner {
             if (line.contains(trigger))
                 return true;
         return false;
-	}
-	
-	public String getResult() {
-		return result;
-	}
-	
-	public boolean isResultFalse() {
-		return result.equals(Constants.FALSE);
-	}
-	
-	public boolean isResultTrue() {
-		return result.equals(Constants.TRUE);
-	}
-	
-	public String getResultMessage() {
-		return result_msg;
-	}
-	
-	public boolean isOverapproximation() {
-		return overapprox;
-	}
-	
-	public String getUltimateOutput() {
-		return ultimate_output;
-	}
-	
-	public String getErrorPath() {
-		return error_path;
 	}
 	
 	private String SHA1(File file) throws FileNotFoundException, IOException, NoSuchAlgorithmException {

@@ -94,7 +94,8 @@ public class UltimateGUI {
 	private final Action actionFileOpen = new SwingActionFileOpen();
 	private final Action actionFileQuit = new SwingActionFileQuit();
 	private final Action actionAnalyze = new SwingActionAnalyze();
-	private final Action actionExampleTerminationBounded = new SwingActionExampleTerminationBounded();
+	private final Action actionAnalysisTermination = new SwingActionAnalysisTermination();
+	private final Action actionAnalysisReachability = new SwingActionAnalysisReachability();
 	private final Action actionExampleTerminationUnbounded = new SwingActionExampleTerminationUnbounded();
 	private final Action actionExampleReachabilityBounded = new SwingActionExampleReachabilityBounded();
 	private final Action actionExampleReachabilityUnbounded = new SwingActionExampleReachabilityUnbounded();
@@ -136,8 +137,10 @@ public class UltimateGUI {
 		rdbtn32bits = new JRadioButton("32 bits");
 		rdbtn64bits = new JRadioButton("64 bits");
 		rdbtnReachability = new JRadioButton("Reachability");
+		rdbtnReachability.setAction(actionAnalysisReachability);
 		rdbtnReachability.setToolTipText("Right click on the program to insert the reachability statement on the right of the caret");
 		rdbtnTermination = new JRadioButton("Termination");
+		rdbtnTermination.setAction(actionAnalysisTermination);
 		rdbtnUnbounded = new JRadioButton("Unbounded");
 		rdbtnBounded = new JRadioButton("Bounded");
 		chckbxmntmShowUltimateFull = new JCheckBoxMenuItem("Show Ultimate full log");
@@ -366,10 +369,6 @@ public class UltimateGUI {
 		JSeparator separator = new JSeparator();
 		mnExamples.add(separator);
 		
-		JMenuItem mntmTerminationBounded = new JMenuItem("Termination - Bounded");
-		mntmTerminationBounded.setAction(actionExampleTerminationBounded);
-		mnExamples.add(mntmTerminationBounded);
-		
 		JMenuItem mntmTerminationUnbounded = new JMenuItem("Termination - Unbounded");
 		mntmTerminationUnbounded.setAction(actionExampleTerminationUnbounded);
 		mnExamples.add(mntmTerminationUnbounded);
@@ -458,6 +457,32 @@ public class UltimateGUI {
 		}
 		public void actionPerformed(ActionEvent e) {
 			System.exit(0);
+		}
+	}
+	private class SwingActionAnalysisTermination extends AbstractAction {
+		private static final long serialVersionUID = -1172163615928479063L;
+		public SwingActionAnalysisTermination() {
+			putValue(NAME, "Termination");
+			putValue(SHORT_DESCRIPTION, "Termination");
+			putValue(MNEMONIC_KEY, KeyEvent.VK_T);
+			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK));
+		}
+		public void actionPerformed(ActionEvent e) {
+			rdbtnUnbounded.setSelected(true);
+			rdbtnBounded.setSelected(false);
+			rdbtnBounded.setEnabled(false);
+		}
+	}
+	private class SwingActionAnalysisReachability extends AbstractAction {
+		private static final long serialVersionUID = 7037027169234469615L;
+		public SwingActionAnalysisReachability() {
+			putValue(NAME, "Reachability");
+			putValue(SHORT_DESCRIPTION, "Reachability");
+			putValue(MNEMONIC_KEY, KeyEvent.VK_R);
+			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK));
+		}
+		public void actionPerformed(ActionEvent e) {
+			rdbtnBounded.setEnabled(true);
 		}
 	}
 	private class SwingActionAnalyze extends AbstractAction {
@@ -556,44 +581,6 @@ public class UltimateGUI {
 			tabbedPane.setSelectedComponent(resultTab);
 		}
 	}
-	private class SwingActionExampleTerminationBounded extends AbstractAction {
-		private static final long serialVersionUID = 6735251012364080512L;
-		public SwingActionExampleTerminationBounded() {
-			putValue(NAME, "Termination - Bounded");
-			putValue(SHORT_DESCRIPTION, "Termination analysis example with bounded values");
-		}
-		public void actionPerformed(ActionEvent e) {
-			//TODO: ask for saving previous opened file, if changed
-			StringBuilder sb = new StringBuilder();
-			sb.append("extern int nd();")
-				.append(Constants.LINE_SEPARATOR)
-				.append(Constants.LINE_SEPARATOR)
-				.append("int main(void) {")
-				.append(Constants.LINE_SEPARATOR)
-				.append(Constants.TAB).append("int x = nd();")
-				.append(Constants.LINE_SEPARATOR)
-				.append(Constants.TAB).append("int y = x + 1;")
-				.append(Constants.LINE_SEPARATOR)
-				.append(Constants.TAB).append("while (x < y) {")
-				.append(Constants.LINE_SEPARATOR)
-				.append(Constants.TAB).append(Constants.TAB).append("x = x + 1;")
-				.append(Constants.LINE_SEPARATOR)
-				.append(Constants.TAB).append(Constants.TAB).append("y = y + 1;")
-				.append(Constants.LINE_SEPARATOR)
-				.append(Constants.TAB).append("}")
-				.append(Constants.LINE_SEPARATOR)
-				.append("}")
-				.append(Constants.LINE_SEPARATOR);
-			
-			rdbtnReachability.setSelected(false);
-			rdbtnTermination.setSelected(true);
-			rdbtnBounded.setSelected(true);
-			rdbtnUnbounded.setSelected(false);
-			programPane.setText(sb.toString());
-			programPane.setCaretPosition(0);
-			tabbedPane.setSelectedComponent(programTab);
-		}
-	}
 	private class SwingActionExampleTerminationUnbounded extends AbstractAction {
 		private static final long serialVersionUID = 8244185466711726741L;
 		public SwingActionExampleTerminationUnbounded() {
@@ -626,6 +613,7 @@ public class UltimateGUI {
 			rdbtnReachability.setSelected(false);
 			rdbtnTermination.setSelected(true);
 			rdbtnBounded.setSelected(false);
+			rdbtnBounded.setEnabled(false);
 			rdbtnUnbounded.setSelected(true);
 			programPane.setText(sb.toString());
 			programPane.setCaretPosition(0);
@@ -670,6 +658,7 @@ public class UltimateGUI {
 			rdbtnReachability.setSelected(true);
 			rdbtnTermination.setSelected(false);
 			rdbtnBounded.setSelected(true);
+			rdbtnBounded.setEnabled(true);
 			rdbtnUnbounded.setSelected(false);
 			programPane.setText(sb.toString());
 			programPane.setCaretPosition(0);
@@ -714,6 +703,7 @@ public class UltimateGUI {
 			rdbtnReachability.setSelected(true);
 			rdbtnTermination.setSelected(false);
 			rdbtnBounded.setSelected(false);
+			rdbtnBounded.setEnabled(true);
 			rdbtnUnbounded.setSelected(true);
 			programPane.setText(sb.toString());
 			programPane.setCaretPosition(0);

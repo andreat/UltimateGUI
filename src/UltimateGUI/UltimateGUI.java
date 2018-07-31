@@ -30,7 +30,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -43,6 +42,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -65,7 +65,6 @@ import UltimateGUI.util.ANALYSIS;
 import UltimateGUI.util.ARCHITECTURE;
 import UltimateGUI.util.Constants;
 import UltimateGUI.util.PRECISION;
-import UltimateGUI.util.UltimateException;
 import UltimateGUI.util.UltimateRunner;
 
 public class UltimateGUI {
@@ -76,6 +75,7 @@ public class UltimateGUI {
 	private final JTabbedPane tabbedPane;
 	private final JEditorPane programPane;
 	private final JTextPane resultPane;
+	private final BusyUltimate busyUltimate;
 	
 	private Component programTab;
 	private Component resultTab;
@@ -111,6 +111,7 @@ public class UltimateGUI {
 				try {
 					UltimateGUI window = new UltimateGUI();
 					window.frmUltimateGui.setVisible(true);
+					window.busyUltimate.initialize();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -134,7 +135,6 @@ public class UltimateGUI {
 		frmUltimateGui.setTitle("Ultimate GUI");
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		programPane = new JEditorPane();
-		
 		resultPane = new JTextPane();
 		fileChooser = new JFileChooserConfirmed();
 		rdbtn32bits = new JRadioButton("32 bits");
@@ -147,6 +147,7 @@ public class UltimateGUI {
 		rdbtnUnbounded = new JRadioButton("Unbounded");
 		rdbtnBounded = new JRadioButton("Bounded");
 		chckbxShowUltimateFull = new JCheckBox("Show Ultimate full log");
+		busyUltimate = new BusyUltimate(frmUltimateGui);
 		initialize();
 	}
 
@@ -389,6 +390,8 @@ public class UltimateGUI {
 			//TODO: ask for saving previous opened file, if changed
 			openedFile = null;
 			programPane.setText(Constants.C_PROGRAM);
+			programPane.setCaretPosition(0);
+			tabbedPane.setSelectedComponent(programTab);
 		}
 	}
 	private class SwingActionFileOpen extends AbstractAction {
@@ -406,6 +409,8 @@ public class UltimateGUI {
 				openedFile = fileChooser.getSelectedFile();
 				try(FileReader fr = new FileReader(openedFile)){
 					programPane.read(fr, openedFile);
+					programPane.setCaretPosition(0);
+					tabbedPane.setSelectedComponent(programTab);
 				} catch (IOException ioe) {
 				}
 			}
@@ -532,12 +537,21 @@ public class UltimateGUI {
 			}
 			UltimateRunner runner = new UltimateRunner(window, programPane.getText(), architecture, analysis, precision, chckbxShowUltimateFull.isSelected());
 			runner.execute();
+			showBusy();
 		}	
 	}
+	
 	public void setResult(String content) {
 		resultPane.setText(content);
 		resultPane.setCaretPosition(0);
 		tabbedPane.setSelectedComponent(resultTab);
+	}
+
+	public void showBusy() {
+		busyUltimate.setVisible(true);
+	}
+	public void hideBusy() {
+		busyUltimate.setVisible(false);
 	}
 
 	private class SwingActionExampleTerminationUnbounded extends AbstractAction {

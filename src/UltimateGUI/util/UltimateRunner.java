@@ -263,8 +263,9 @@ public class UltimateRunner extends SwingWorker<Void, Void>{
 	}
 	
 	@Override
-	protected void done( ) {
+	protected void done() {
 		window.setResult(resultText);
+		window.hideBusy();
 	}
 	
 	private boolean contains_overapproximation_result(String line) {

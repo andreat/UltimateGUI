@@ -33,7 +33,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -84,7 +83,10 @@ public class UltimateGUI {
 	private Component programTab;
 	private Component resultTab;
 	
-	private final JFileChooser fileChooser; 
+	private final JFileChooser fileChooser;
+	
+	private final JMenuItem mntmReload;
+	
 	private final JRadioButton rdbtn32bits;
 	private final JRadioButton rdbtn64bits;
 	private final JRadioButton rdbtnReachability;
@@ -92,10 +94,11 @@ public class UltimateGUI {
 	private final JRadioButton rdbtnUnbounded;
 	private final JRadioButton rdbtnBounded;
 	private final JCheckBox chckbxShowUltimateFull;
-	private final Action actionFileSave = new SwingActionFileSave();
-	private final Action actionFileSaveAs = new SwingActionFileSaveAs();
 	private final Action actionFileNew = new SwingActionFileNew();
 	private final Action actionFileOpen = new SwingActionFileOpen();
+	private final Action actionFileSave = new SwingActionFileSave();
+	private final Action actionFileSaveAs = new SwingActionFileSaveAs();
+	private final Action actionFileReload = new SwingActionFileReload();
 	private final Action actionFileQuit = new SwingActionFileQuit();
 	private final Action actionAnalyze = new SwingActionAnalyze();
 	private final Action actionAnalysisTermination = new SwingActionAnalysisTermination();
@@ -149,6 +152,7 @@ public class UltimateGUI {
 		programPane = new JEditorPane();
 		resultPane = new JTextPane();
 		fileChooser = new JFileChooserConfirmed();
+		mntmReload = new JMenuItem("Reload");
 		rdbtn32bits = new JRadioButton("32 bits");
 		rdbtn64bits = new JRadioButton("64 bits");
 		rdbtnReachability = new JRadioButton("Reachability");
@@ -365,6 +369,12 @@ public class UltimateGUI {
 		mnFile.add(mntmSaveAs);
 		
 		mnFile.add(new JSeparator());
+
+		mntmReload.setEnabled(false);
+		mntmReload.setAction(actionFileReload);
+		mnFile.add(mntmReload);
+		
+		mnFile.add(new JSeparator());
 		
 		JMenuItem mntmQuit = new JMenuItem("Quit");
 		mntmQuit.setAction(actionFileQuit);
@@ -390,6 +400,49 @@ public class UltimateGUI {
 		mnExamples.add(mntmTerminationUnbounded);
 	}
 
+	public void saveProgram() {
+		if (openedFile == null) {
+			int returnVal = fileChooser.showSaveDialog(frmUltimateGui);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				openedFile = fileChooser.getSelectedFile();
+			}
+		}
+		try(FileWriter fw = new FileWriter(openedFile)) {
+			openedFile = null;
+			mntmReload.setEnabled(false);
+			programPane.write(fw);
+			openedFile = fileChooser.getSelectedFile();
+			mntmReload.setEnabled(true);
+			originalProgram = programPane.getText();
+			frmUltimateGui.setTitle(Constants.ULTIMATE_GUI_TITLE + Constants.ULTIMATE_GUI_TITLE_SEPARATOR + openedFile.getName());
+		} catch (IOException ioe) {
+		}
+	}
+	
+	public void saveIfChanged() {
+		String currentProgram = programPane.getText();
+		if (!currentProgram.equals(originalProgram)) {
+            int result = JOptionPane.showConfirmDialog(frmUltimateGui, "The program has been modified; save it?", "Program changed", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+            	saveProgram();
+            }
+		}
+	}
+	
+	public void setResult(String content) {
+		resultPane.setText(content);
+		resultPane.setCaretPosition(0);
+		tabbedPane.setSelectedComponent(resultTab);
+	}
+
+	public void showBusy() {
+		busyUltimate.setVisible(true);
+	}
+
+	public void hideBusy() {
+		busyUltimate.setVisible(false);
+	}
+
 	private class SwingActionFileNew extends AbstractAction {
 		private static final long serialVersionUID = 3432287660429881876L;
 		public SwingActionFileNew() {
@@ -401,17 +454,19 @@ public class UltimateGUI {
 		public void actionPerformed(ActionEvent e) {
 			saveIfChanged();
 			openedFile = null;
+			mntmReload.setEnabled(false);
 			programPane.setText(Constants.C_PROGRAM);
 			programPane.setCaretPosition(0);
 			tabbedPane.setSelectedComponent(programTab);
 			originalProgram = Constants.C_PROGRAM;
 		}
 	}
+	
 	private class SwingActionFileOpen extends AbstractAction {
 		private static final long serialVersionUID = -7569623789378646401L;
 		public SwingActionFileOpen() {
 			putValue(NAME, "Open");
-			putValue(SHORT_DESCRIPTION, "Open C program");
+			putValue(SHORT_DESCRIPTION, "Open C program from file");
 			putValue(MNEMONIC_KEY, KeyEvent.VK_O);
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
 		}
@@ -431,20 +486,7 @@ public class UltimateGUI {
 			}
 		}
 	}
-	public void saveProgram() {
-		if (openedFile == null) {
-			int returnVal = fileChooser.showSaveDialog(frmUltimateGui);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				openedFile = fileChooser.getSelectedFile();
-			}
-		}
-		try(FileWriter fw = new FileWriter(openedFile)) {
-			programPane.write(fw);
-			originalProgram = programPane.getText();
-			frmUltimateGui.setTitle(Constants.ULTIMATE_GUI_TITLE + Constants.ULTIMATE_GUI_TITLE_SEPARATOR + openedFile.getName());
-		} catch (IOException ioe) {
-		}
-	}
+
 	private class SwingActionFileSave extends AbstractAction {
 		private static final long serialVersionUID = 2925662427868932805L;
 		public SwingActionFileSave() {
@@ -457,6 +499,7 @@ public class UltimateGUI {
 			saveProgram();
 		}
 	}
+	
 	private class SwingActionFileSaveAs extends AbstractAction {
 		private static final long serialVersionUID = 4228418017569653685L;
 		public SwingActionFileSaveAs() {
@@ -465,10 +508,39 @@ public class UltimateGUI {
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
 		}
 		public void actionPerformed(ActionEvent e) {
+			File oldOpenedFile = openedFile;
 			openedFile = null;
+			mntmReload.setEnabled(false);
 			saveProgram();
+			if (openedFile == null) {
+				openedFile = oldOpenedFile;
+			}
 		}
 	}
+	
+	private class SwingActionFileReload extends AbstractAction {
+		private static final long serialVersionUID = -5377094694295502488L;
+		public SwingActionFileReload() {
+			putValue(NAME, "Reload");
+			putValue(SHORT_DESCRIPTION, "Reload C program from file");
+			putValue(MNEMONIC_KEY, KeyEvent.VK_R);
+			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
+		}
+		public void actionPerformed(ActionEvent e) {
+			saveIfChanged();
+			if (openedFile != null) {
+				try(FileReader fr = new FileReader(openedFile)){
+					programPane.read(fr, openedFile);
+					programPane.setCaretPosition(0);
+					tabbedPane.setSelectedComponent(programTab);
+					originalProgram = programPane.getText();
+					frmUltimateGui.setTitle(Constants.ULTIMATE_GUI_TITLE + Constants.ULTIMATE_GUI_TITLE_SEPARATOR + openedFile.getName());
+				} catch (IOException ioe) {
+				}
+			}
+		}
+	}
+
 	private class SwingActionFileQuit extends AbstractAction {
 		private static final long serialVersionUID = 6100833632380456699L;
 		public SwingActionFileQuit() {
@@ -482,6 +554,7 @@ public class UltimateGUI {
 			System.exit(0);
 		}
 	}
+	
 	private class SwingActionAnalysisTermination extends AbstractAction {
 		private static final long serialVersionUID = -1172163615928479063L;
 		public SwingActionAnalysisTermination() {
@@ -496,6 +569,7 @@ public class UltimateGUI {
 			rdbtnBounded.setEnabled(false);
 		}
 	}
+	
 	private class SwingActionAnalysisReachability extends AbstractAction {
 		private static final long serialVersionUID = 7037027169234469615L;
 		public SwingActionAnalysisReachability() {
@@ -508,6 +582,7 @@ public class UltimateGUI {
 			rdbtnBounded.setEnabled(true);
 		}
 	}
+	
 	private class SwingActionAnalyze extends AbstractAction {
 		private static final long serialVersionUID = 8469386610216349976L;
 		public SwingActionAnalyze() {
@@ -556,29 +631,6 @@ public class UltimateGUI {
 		}	
 	}
 	
-	public void saveIfChanged() {
-		String currentProgram = programPane.getText();
-		if (!currentProgram.equals(originalProgram)) {
-            int result = JOptionPane.showConfirmDialog(frmUltimateGui, "The program has been modified; save it?", "Program changed", JOptionPane.YES_NO_CANCEL_OPTION);
-            if (result == JOptionPane.YES_OPTION) {
-            	saveProgram();
-            }
-		}
-	}
-	
-	public void setResult(String content) {
-		resultPane.setText(content);
-		resultPane.setCaretPosition(0);
-		tabbedPane.setSelectedComponent(resultTab);
-	}
-
-	public void showBusy() {
-		busyUltimate.setVisible(true);
-	}
-	public void hideBusy() {
-		busyUltimate.setVisible(false);
-	}
-
 	private class SwingActionExampleTerminationUnbounded extends AbstractAction {
 		private static final long serialVersionUID = 8244185466711726741L;
 		public SwingActionExampleTerminationUnbounded() {
@@ -645,9 +697,7 @@ public class UltimateGUI {
 				.append(Constants.TAB).append(Constants.TAB).append("y = y + 1;")
 				.append(Constants.LINE_SEPARATOR)
 				.append(Constants.TAB).append(Constants.TAB).append("if (y < x) {")
-				.append(Constants.LINE_SEPARATOR)
-				.append(Constants.TAB).append(Constants.TAB).append(Constants.TAB).append(Constants.REACHABILITY_STATEMENT)
-				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.REACHABILITY_STATEMENT)
 				.append(Constants.TAB).append(Constants.TAB).append("}")
 				.append(Constants.LINE_SEPARATOR)
 				.append(Constants.TAB).append("}")
@@ -692,9 +742,7 @@ public class UltimateGUI {
 				.append(Constants.TAB).append(Constants.TAB).append("y = y + 1;")
 				.append(Constants.LINE_SEPARATOR)
 				.append(Constants.TAB).append(Constants.TAB).append("if (y < x) {")
-				.append(Constants.LINE_SEPARATOR)
-				.append(Constants.TAB).append(Constants.TAB).append(Constants.TAB).append(Constants.REACHABILITY_STATEMENT)
-				.append(Constants.LINE_SEPARATOR)
+				.append(Constants.REACHABILITY_STATEMENT)
 				.append(Constants.TAB).append(Constants.TAB).append("}")
 				.append(Constants.LINE_SEPARATOR)
 				.append(Constants.TAB).append("}")

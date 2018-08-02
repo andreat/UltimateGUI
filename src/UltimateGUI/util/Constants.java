@@ -49,6 +49,7 @@ public class Constants {
 	public static final String REACHABILITY_STATEMENT = 
 			LINE_SEPARATOR 
 			+ "//the reachability statement is represented by this specific call"
+			+ LINE_SEPARATOR
 			+ "__VERIFIER_error();"
 			+ LINE_SEPARATOR
 			;

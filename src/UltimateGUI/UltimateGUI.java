@@ -31,6 +31,9 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -135,6 +138,12 @@ public class UltimateGUI {
 		window = this;
 		openedFile = null;
 		frmUltimateGui = new JFrame();
+		frmUltimateGui.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				saveIfChanged();
+			}
+		});
 		frmUltimateGui.setTitle(Constants.ULTIMATE_GUI_TITLE);
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		programPane = new JEditorPane();

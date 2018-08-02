@@ -38,12 +38,20 @@ public class Constants {
 		}
 	}
 	
+	public static final String ULTIMATE_GUI_TITLE = "Ultimate GUI";
+	public static final String ULTIMATE_GUI_TITLE_SEPARATOR = " - ";
+	
 	public static final String TRUE = "TRUE";
 	public static final String FALSE = "FALSE";
 	
 	public static final String C_PROGRAM = "//C program";
 	public static final String TAB = "    ";
-	public static final String REACHABILITY_STATEMENT = "__VERIFIER_error();";
+	public static final String REACHABILITY_STATEMENT = 
+			LINE_SEPARATOR 
+			+ "//the reachability statement is represented by this specific call"
+			+ "__VERIFIER_error();"
+			+ LINE_SEPARATOR
+			;
 	
 	public static final String version = "8e1d75aa";
 	public static final String toolname = "Automizer";

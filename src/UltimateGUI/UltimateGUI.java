@@ -20,6 +20,7 @@ package UltimateGUI;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -42,13 +43,13 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
@@ -102,6 +103,8 @@ public class UltimateGUI {
 	private final Action actionInsertReachabilityStatement = new SwingActionInsertReachabilityStatement();
 
 	private final UltimateGUI window;
+	private String originalProgram = Constants.C_PROGRAM;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -132,7 +135,7 @@ public class UltimateGUI {
 		window = this;
 		openedFile = null;
 		frmUltimateGui = new JFrame();
-		frmUltimateGui.setTitle("Ultimate GUI");
+		frmUltimateGui.setTitle(Constants.ULTIMATE_GUI_TITLE);
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		programPane = new JEditorPane();
 		resultPane = new JTextPane();
@@ -155,7 +158,7 @@ public class UltimateGUI {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frmUltimateGui.setBounds(100, 100, 900, 700);
+		frmUltimateGui.setSize(new Dimension(900, 700));
 		frmUltimateGui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmUltimateGui.getContentPane().setLayout(new BorderLayout(0, 0));
 		
@@ -387,11 +390,12 @@ public class UltimateGUI {
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
 		}
 		public void actionPerformed(ActionEvent e) {
-			//TODO: ask for saving previous opened file, if changed
+			saveIfChanged();
 			openedFile = null;
 			programPane.setText(Constants.C_PROGRAM);
 			programPane.setCaretPosition(0);
 			tabbedPane.setSelectedComponent(programTab);
+			originalProgram = Constants.C_PROGRAM;
 		}
 	}
 	private class SwingActionFileOpen extends AbstractAction {
@@ -403,7 +407,7 @@ public class UltimateGUI {
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
 		}
 		public void actionPerformed(ActionEvent e) {
-			//TODO: ask for saving previous opened file, if changed
+			saveIfChanged();
 			int returnVal = fileChooser.showOpenDialog(frmUltimateGui);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				openedFile = fileChooser.getSelectedFile();
@@ -411,9 +415,25 @@ public class UltimateGUI {
 					programPane.read(fr, openedFile);
 					programPane.setCaretPosition(0);
 					tabbedPane.setSelectedComponent(programTab);
+					originalProgram = programPane.getText();
+					frmUltimateGui.setTitle(Constants.ULTIMATE_GUI_TITLE + Constants.ULTIMATE_GUI_TITLE_SEPARATOR + openedFile.getName());
 				} catch (IOException ioe) {
 				}
 			}
+		}
+	}
+	public void saveProgram() {
+		if (openedFile == null) {
+			int returnVal = fileChooser.showSaveDialog(frmUltimateGui);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				openedFile = fileChooser.getSelectedFile();
+			}
+		}
+		try(FileWriter fw = new FileWriter(openedFile)) {
+			programPane.write(fw);
+			originalProgram = programPane.getText();
+			frmUltimateGui.setTitle(Constants.ULTIMATE_GUI_TITLE + Constants.ULTIMATE_GUI_TITLE_SEPARATOR + openedFile.getName());
+		} catch (IOException ioe) {
 		}
 	}
 	private class SwingActionFileSave extends AbstractAction {
@@ -425,16 +445,7 @@ public class UltimateGUI {
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
 		}
 		public void actionPerformed(ActionEvent e) {
-			if (openedFile == null) {
-				int returnVal = fileChooser.showSaveDialog(frmUltimateGui);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					openedFile = fileChooser.getSelectedFile();
-				}
-			}
-			try(FileWriter fw = new FileWriter(openedFile)) {
-				programPane.write(fw);
-			} catch (IOException ioe) {
-			}
+			saveProgram();
 		}
 	}
 	private class SwingActionFileSaveAs extends AbstractAction {
@@ -445,14 +456,8 @@ public class UltimateGUI {
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
 		}
 		public void actionPerformed(ActionEvent e) {
-			int returnVal = fileChooser.showSaveDialog(frmUltimateGui);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				File file = fileChooser.getSelectedFile();
-				try(FileWriter fw = new FileWriter(file)) {
-					programPane.write(fw);
-				} catch (IOException ioe) {
-				}
-			}
+			openedFile = null;
+			saveProgram();
 		}
 	}
 	private class SwingActionFileQuit extends AbstractAction {
@@ -464,6 +469,7 @@ public class UltimateGUI {
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
 		}
 		public void actionPerformed(ActionEvent e) {
+			saveIfChanged();
 			System.exit(0);
 		}
 	}
@@ -541,6 +547,16 @@ public class UltimateGUI {
 		}	
 	}
 	
+	public void saveIfChanged() {
+		String currentProgram = programPane.getText();
+		if (!currentProgram.equals(originalProgram)) {
+            int result = JOptionPane.showConfirmDialog(frmUltimateGui, "The program has been modified; save it?", "Program changed", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+            	saveProgram();
+            }
+		}
+	}
+	
 	public void setResult(String content) {
 		resultPane.setText(content);
 		resultPane.setCaretPosition(0);
@@ -561,7 +577,7 @@ public class UltimateGUI {
 			putValue(SHORT_DESCRIPTION, "Termination analysis example with unbounded values");
 		}
 		public void actionPerformed(ActionEvent e) {
-			//TODO: ask for saving previous opened file, if changed
+			saveIfChanged();
 			StringBuilder sb = new StringBuilder();
 			sb.append("extern int nd();")
 				.append(Constants.LINE_SEPARATOR)
@@ -582,15 +598,17 @@ public class UltimateGUI {
 				.append(Constants.LINE_SEPARATOR)
 				.append("}")
 				.append(Constants.LINE_SEPARATOR);
+			String example = sb.toString();
 			
 			rdbtnReachability.setSelected(false);
 			rdbtnTermination.setSelected(true);
 			rdbtnBounded.setSelected(false);
 			rdbtnBounded.setEnabled(false);
 			rdbtnUnbounded.setSelected(true);
-			programPane.setText(sb.toString());
+			programPane.setText(example);
 			programPane.setCaretPosition(0);
 			tabbedPane.setSelectedComponent(programTab);
+			originalProgram = example;
 		}
 	}
 	private class SwingActionExampleReachabilityBounded extends AbstractAction {
@@ -600,7 +618,7 @@ public class UltimateGUI {
 			putValue(SHORT_DESCRIPTION, "Reachability analysis example with bounded values");
 		}
 		public void actionPerformed(ActionEvent e) {
-			//TODO: ask for saving previous opened file, if changed
+			saveIfChanged();
 			StringBuilder sb = new StringBuilder();
 			sb.append("extern int nd();")
 				.append(Constants.LINE_SEPARATOR)
@@ -627,15 +645,17 @@ public class UltimateGUI {
 				.append(Constants.LINE_SEPARATOR)
 				.append("}")
 				.append(Constants.LINE_SEPARATOR);
+			String example = sb.toString();
 			
 			rdbtnReachability.setSelected(true);
 			rdbtnTermination.setSelected(false);
 			rdbtnBounded.setSelected(true);
 			rdbtnBounded.setEnabled(true);
 			rdbtnUnbounded.setSelected(false);
-			programPane.setText(sb.toString());
+			programPane.setText(example);
 			programPane.setCaretPosition(0);
 			tabbedPane.setSelectedComponent(programTab);
+			originalProgram = example;
 		}
 	}
 	private class SwingActionExampleReachabilityUnbounded extends AbstractAction {
@@ -645,7 +665,7 @@ public class UltimateGUI {
 			putValue(SHORT_DESCRIPTION, "Reachability analysis example with unbounded values");
 		}
 		public void actionPerformed(ActionEvent e) {
-			//TODO: ask for saving previous opened file, if changed
+			saveIfChanged();
 			StringBuilder sb = new StringBuilder();
 			sb.append("extern int nd();")
 				.append(Constants.LINE_SEPARATOR)
@@ -672,15 +692,17 @@ public class UltimateGUI {
 				.append(Constants.LINE_SEPARATOR)
 				.append("}")
 				.append(Constants.LINE_SEPARATOR);
+			String example = sb.toString();
 			
 			rdbtnReachability.setSelected(true);
 			rdbtnTermination.setSelected(false);
 			rdbtnBounded.setSelected(false);
 			rdbtnBounded.setEnabled(true);
 			rdbtnUnbounded.setSelected(true);
-			programPane.setText(sb.toString());
+			programPane.setText(example);
 			programPane.setCaretPosition(0);
 			tabbedPane.setSelectedComponent(programTab);
+			originalProgram = example;
 		}
 	}
 	private class SwingActionInsertReachabilityStatement extends AbstractAction {
@@ -698,10 +720,10 @@ public class UltimateGUI {
 			if (caretPosition > 0) {
 				sb.append(program.substring(0, caretPosition));
 			}
-			sb.append(Constants.LINE_SEPARATOR)
-				.append(Constants.REACHABILITY_STATEMENT)
+			sb.append(Constants.REACHABILITY_STATEMENT)
 				.append(program.substring(caretPosition));
 			programPane.setText(sb.toString());
+			programPane.setCaretPosition(caretPosition);
 		}
 	}
 	private static void addPopup(Component component, final JPopupMenu popup) {
